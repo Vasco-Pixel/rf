@@ -1,29 +1,30 @@
 // ==UserScript==
-// @name         minimap Pixelzone
+// @name         VascoPixel	
+// @name         VascoPixel
 // @namespace    http://tampermonkey.net/
-// @version      1.0
-// @description  -
+// @version      1.7.1
+// @description  template
 // @author       meatie
 // @match        https://pixelzone.io/*
-// @homepage     https://github.com/Vasco-Pixel/rf
-// @updateURL    https://raw.githubusercontent.com/Vasco-Pixel/rf/raw/master/mengopixel.user.js
+// @homepage     https://github.com/pixelfixinit/TurkeyMap
+// @updateURL    https://raw.githubusercontent.com/pixelfixinit/TurkeyMap/master/minimap_meatie.js
 // @grant        none
 // ==/UserScript==
+/*Based on https://github.com/pixelfixinit/TurkeyMap
+*/
 
 // Default location of template images and templates.json. Is user input and stored in a cookie.
-var baseTemplateUrl = 'https://raw.githubusercontent.com/Vasco-Pixel/rf/master'; //only as default
-var subfolders = false; //True means use subfolders images and templates
+var baseTemplateUrl = 'https://raw.githubusercontent.com/Vasco-Pixel/rf//master/'; //only as default
 var vers = "Minimap";
 var range = 6; //margin for showing the map window
 
 var x, y, zoomlevel, zooming_out, zooming_in, zoom_time, x_window, y_window, coorDOM, gameWindow;
-var toggle_show, toggle_follow, toggle_grid, counter, image_list, needed_templates, mousemoved;
+var toggle_show, toggle_follow, counter, image_list, needed_templates, mousemoved;
 var minimap, minimap_board, minimap_cursor, minimap_box, minimap_text;
 var ctx_minimap, ctx_minimap_board, ctx_minimap_cursor;
 //Regular Expression to get coordinates out of URL
 var re_url = /\?p=([-\d]+),([-\d]+)/;
 var timerDiv;
-var playercountNode, bumpSpan;
 
 Number.prototype.between = function(a, b) {
   var min = Math.min.apply(Math, [a, b]);
@@ -36,18 +37,16 @@ window.addEventListener('load', function() {
 }, false);
 
 function startup() {
-  /*var i, t = getCookie("baseTemplateUrl");
+  var i, t = getCookie("baseTemplateUrl");
   if(!t) {
-		var msg = "URL Location of template images and templates.json.";
-		if(subfolders) msg = "Base URL where you have folders: templates and images."
-    t = prompt(msg+"\nhttps: is required. Stores in a cookie.", baseTemplateUrl);
+    t = prompt("Location of template images and templates.json\nhttps: is required. Stores in a cookie.", baseTemplateUrl);
     if(t) setCookie("baseTemplateUrl", t);
     else t = "";
   }
-  baseTemplateUrl = t;*/
+  baseTemplateUrl = t;
 
   console.log(vers+". TemplateUrl", baseTemplateUrl);
-  console.log("Try: listTemplates() and keys space, QWERTYUIOP[ ASDFG, X");
+  console.log("Try: listTemplates() and keys H, QWERTYUIOP[ ASDFG, X");
   gameWindow = document.getElementById("canvas");
   //DOM element of the displayed X, Y
   coorDOM = document.getElementById("coordinatesNote");
@@ -74,7 +73,7 @@ function startup() {
   var div = document.createElement('div');
   div.setAttribute('class', 'post block bc2');
   div.innerHTML = '<style>.grecaptcha-badge,#message{display: none}.palette-footer{z-index:5}</style>\n' +
-    '<div id="minimapbg" style="background-color:rgba(0,0,0,0.8); border-radius:12px; position:absolute; right:6px; bottom:6px; z-index:1;">' +
+    '<div id="minimapbg" style="background-color:rgba(0,0,0,0.2); border-radius:12px; position:absolute; right:6px; bottom:6px; z-index:1;">' +
     '<div class="posy unselectable" id="posyt" style="background-size:100%; color:#fff; text-align:center; line-height:32px; vertical-align:middle; width:auto; height:auto; padding:6px 8px;">' +
     '<div id="minimap-text"></div>' +
     '<div id="minimap-title" style="line-height: 15px; font-size: 0.9em;">' + vers + '</div>' +
@@ -85,7 +84,6 @@ function startup() {
     '</div><div id="minimap-config" style="line-height:15px;">' +
     ' <span id="hide-map" style="cursor:pointer;">Esconder' +
     ' </span> | <span id="follow-mouse" style="cursor:pointer;">Seguir Mouse' +
-    ' </span> | <span id="toggle-grid" style="cursor:pointer;">Grade' +
     ' </span> | Zoom: <span id="zoom-plus" style="cursor:pointer;font-weight:bold;">&nbsp;+&nbsp;</span>/' +
     ' <span id="zoom-minus" style="cursor:pointer;font-weight:bold;">&nbsp;-&nbsp;</span>' +
     '</div>' +
@@ -108,15 +106,6 @@ function startup() {
   minimap_box = document.getElementById("minimap-box");
   minimap_text = document.getElementById("minimap-text");
 
-  playercountNode = document.getElementById("playerCounterNote");
-  if(playercountNode) {
-    playercountNode = playercountNode.childNodes[0].childNodes[0].childNodes[0];
-    bumpSpan = document.createElement('span');
-    bumpSpan.setAttribute('style', 'font-size:60%;margin-left:5px');
-    playercountNode.parentElement.parentElement.appendChild(bumpSpan);
-    setInterval(checkAlive, 1000);
-  }
-
   //No Antialiasing when scaling!
   ctx_minimap.mozImageSmoothingEnabled = false;
   ctx_minimap.webkitImageSmoothingEnabled = false;
@@ -136,10 +125,6 @@ function startup() {
   };
   minimap_text.onclick = function () {
     toggleShow(true);
-  };
-  document.getElementById("toggle-grid").onclick = function(){
-    toggle_grid = !toggle_grid;
-    drawBoard();
   };
   document.getElementById("follow-mouse").onclick = function () {
     toggle_follow = !toggle_follow;
@@ -200,19 +185,6 @@ function mymousemove(evt) {
   }
 }
 
-function checkAlive() {
-  if(playercountNode.nodeValue.substr(0,1) != " ") {
-    playercountNode.nodeValue = " "+playercountNode.nodeValue;
-    playercountNode.bump = Date.now();
-    bumpSpan.innerText = 0;
-    bumpSpan.parentElement.style.color="unset";
-  } else {
-    var c = Math.floor((Date.now() - playercountNode.bump)/1000);
-    bumpSpan.innerText = c;
-    if(c>600) bumpSpan.parentElement.style.color="#f66";
-  }
-}
-
 window.listTemplates = function () {
   var ttlpx = 0;
   var mdstr = "";
@@ -225,7 +197,7 @@ window.listTemplates = function () {
     if(!eles.name) return;
     var z = eles.width>300 ? 2 : eles.width>100 ? 4 : 8;
     var n = eles.name+"";
-    if(n.indexOf("//") < 0) n = baseTemplateUrl + (subfolders?"images/":"") + n;
+    if(n.indexOf("//") < 0) n = baseTemplateUrl + n;
     mdstr += '\n#### ' + index + ' ' + eles.width + 'x' + eles.height + ' ' + n;
     mdstr += ' https://pixelzone.io/?p=' + Math.floor(eles.x + eles.width / 2) + ',' + Math.floor(eles.y + eles.height / 2) + ','+z+'\n';
     if(!isNaN(eles.width) && !isNaN(eles.height)) ttlpx += eles.width * eles.height;
@@ -239,14 +211,14 @@ function updateloop() {
   if(!toggle_show) return;
   // Get JSON of available templates
   var xmlhttp = new XMLHttpRequest();
-  var url = baseTemplateUrl + (subfolders?"templates/data.json":"templates.json") + "?" + new Date().getTime();
+  var url = baseTemplateUrl + "templates.json?" + new Date().getTime();
   xmlhttp.onreadystatechange = function () {
     if (this.readyState == 4) {
       if(this.status == 200) {
         window.template_list = JSON.parse(this.responseText);
         if (!toggle_follow) getCenter();
       }
-      //if(this.status == 0 || this.status > 399) setCookie("baseTemplateUrl", "");
+      if(this.status == 0 || this.status > 399) setCookie("baseTemplateUrl", "");
    }
   };
   xmlhttp.open("GET", url, true);
@@ -267,7 +239,7 @@ function toggleShow(newValue) {
     loadTemplates();
   } else {
     minimap_box.style.display = "none";
-    minimap_text.innerHTML = "Mostrar Minimapa";
+    minimap_text.innerHTML = "Mostrar Mapa";
     minimap_text.style.display = "block";
     minimap_text.style.cursor = "pointer";
     document.getElementById("minimap-config").style.display = "none";
@@ -360,7 +332,7 @@ function loadImage(imagename) {
   console.log("    Load image " + imagename, cachebreaker);
   image_list[imagename] = new Image();
   var src = template_list[imagename].name;
-  if(src.indexOf("//") < 0) src = baseTemplateUrl + (subfolders?"images/":"") + src;
+  if(src.indexOf("//") < 0) src = baseTemplateUrl + src;
   if(cachebreaker) src += "?" + cachebreaker;
   image_list[imagename].crossOrigin = "Anonymous";
   image_list[imagename].src = src;
@@ -388,7 +360,7 @@ function drawTemplates() {
 
 function drawBoard() {
   ctx_minimap_board.clearRect(0, 0, minimap_board.width, minimap_board.height);
-  if (zoomlevel <= 4.6 || toggle_grid) return;
+  if (zoomlevel <= 4.6) return;
   ctx_minimap_board.beginPath();
   var bw = minimap_board.width + zoomlevel;
   var bh = minimap_board.height + zoomlevel;
@@ -420,7 +392,7 @@ function drawCursor() {
 
   ctx_minimap_cursor.beginPath();
   ctx_minimap_cursor.lineWidth = zoomlevel / 6;
-  ctx_minimap_cursor.strokeStyle = "#ff4545";
+  ctx_minimap_cursor.strokeStyle = "#ff1b1b";
   ctx_minimap_cursor.rect(zoomlevel * xoff_c, zoomlevel * yoff_c, zoomlevel, zoomlevel);
   ctx_minimap_cursor.stroke();
 }
@@ -441,10 +413,7 @@ function getCenter() {
 
 window.addEventListener('keydown', function(e) {
   switch(e.keyCode) {//e.key is too national
-    case 13: //Enter: captcha Send
-      document.getElementsByClassName("MuiButton-text")[1].click();
-      break;
-    case 32: //space
+    case 72: //H
       toggleShow();
       if(toggle_show) {
         window.cachebreaker++;
@@ -511,7 +480,7 @@ function clickColor(c) {
   target.dispatchEvent(e);
 }
 
-/*window.setCookie = function(name,value) { //you can supply "minutes" as 3rd arg.
+window.setCookie = function(name,value) { //you can supply "minutes" as 3rd arg.
   var argv = setCookie.arguments;
   var argc = setCookie.arguments.length;
   var minutes = (argc > 2) ? argv[2] : 720*24*60; //default 720 days
@@ -525,13 +494,12 @@ function getCookie(name) {
   var value = "; " + document.cookie;
   var parts = value.split("; " + name + "=");
   if (parts.length == 2) return parts.pop().split(";").shift();
-}*/
+}
 
 /* Pixelzone stuff you can use:
 Colors.colorsPalette[0..15][0..2]
   Weirdness: darkgray is 0, black is 1
 Colors.getColorIdFromRGB([0,0,230])  exact only
 Colors.getColorStrFromId(15) = "rgb(0, 0, 230)"
-
 Cookie: lastPaletteColor
 */
