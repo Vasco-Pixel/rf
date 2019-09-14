@@ -6,11 +6,11 @@
 // @description  template
 // @author       meatie
 // @match        https://pixelzone.io/*
-// @homepage     https://github.com/pixelfixinit/TurkeyMap
-// @updateURL    https://raw.githubusercontent.com/pixelfixinit/TurkeyMap/master/minimap_meatie.js
+// @homepage     https://github.com/Vasco-Pixel/rf/
+// @updateURL    https://raw.githubusercontent.com/Vasco-Pixel/rf/raw/master//master/minimap_meatie.js
 // @grant        none
 // ==/UserScript==
-/*Based on https://github.com/pixelfixinit/TurkeyMap
+/*Baseado em https://github.com/pixelfixinit/TurkeyMap
 */
 
 // Default location of template images and templates.json. Is user input and stored in a cookie.
