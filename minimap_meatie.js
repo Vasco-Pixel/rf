@@ -8,6 +8,7 @@
 // @match        https://pixelzone.io/*
 // @homepage     https://github.com/Vasco-Pixel/rf/
 // @updateURL    https://raw.githubusercontent.com/Vasco-Pixel/rf/raw/master//master/minimap_meatie.js
+// @downloadURL  https://raw.githubusercontent.com/Vasco-Pixel/rf/raw/master//master/minimap_meatie.js
 // @grant        none
 // ==/UserScript==
 /*Baseado em https://github.com/pixelfixinit/TurkeyMap
