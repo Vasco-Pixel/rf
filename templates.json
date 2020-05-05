@@ -18,15 +18,15 @@
   "width": 808, "height": 667
 }
 
-"PixelzoneSul10": {
+,"PixelzoneSul10": {
     "name": "PixelzoneSul10.png",
     "x": -4096,
     "y": 0,
     "width": 8142,
     "height": 4096 
-},
+}
 
-"Pixelzone_Norte": {
+,"Pixelzone_Norte": {
     "name": "Pixelzone_Norte.png",
     "x": -4096,
     "y": -4096,
