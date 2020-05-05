@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name         VascoPixel	
-// @name         VascoPixel
+// @name         VascoPixelT	
+// @name         VascoPixelT
 // @namespace    http://tampermonkey.net/
 // @version      1.7.1
 // @description  template
